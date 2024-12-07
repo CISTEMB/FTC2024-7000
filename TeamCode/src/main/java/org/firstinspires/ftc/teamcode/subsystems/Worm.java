@@ -24,6 +24,7 @@ public class Worm extends SubsystemBase {
     private final InterpLUT angleLookup = new InterpLUT();
     private final AnalogInput pot;
 
+    private double elevatorDistanceInInches;
     public enum WormState {
         Raising,
         Lowering,
@@ -67,6 +68,9 @@ public class Worm extends SubsystemBase {
     }
 
 
+    public void SetElevatorDistanceInInches(double distance) {
+        elevatorDistanceInInches = distance;
+    }
     public double getAngle() {
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
         return (potentiometerAngle);
@@ -93,10 +97,14 @@ public class Worm extends SubsystemBase {
     }
 
     public void lower(double whatPower) {
-        telemetry.addData("WormState", "lower");
-        CurrentState = WormState.Lowering;
-        motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor.setPower(whatPower);
+        if (elevatorDistanceInInches < 19) {
+            telemetry.addData("WormState", "lower");
+            CurrentState = WormState.Lowering;
+            motor.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.setPower(whatPower);
+        } else {
+            telemetry.addData("Worm says elevator at max distance", elevatorDistanceInInches);
+        }
     }
 
     public void brake(){

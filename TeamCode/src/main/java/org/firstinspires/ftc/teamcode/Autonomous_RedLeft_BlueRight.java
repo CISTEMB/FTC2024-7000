@@ -58,4 +58,12 @@ public class Autonomous_RedLeft_BlueRight extends CommandOpMode {
                 new TrajectorySequenceFollowerCommand(drive, trajectory1)
         ));
     }
+
+    @Override
+    public void run() {
+        super.run();
+        elevator.SetWormAngle(worm.getAngle()); //set this continually so elevator can know how far it can go
+        worm.SetElevatorDistanceInInches(elevator.getHorizontalExtension());
+        telemetry.update();
+    }
 }

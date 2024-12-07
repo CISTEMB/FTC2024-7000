@@ -51,6 +51,8 @@ public class Autonomous_Park_AscentZone extends OpMode {
 
     @Override
     public void loop() {
-
+        elevator.SetWormAngle(worm.getAngle()); //set this continually so elevator can know how far it can go
+        worm.SetElevatorDistanceInInches(elevator.getHorizontalExtension());
+        telemetry.update();
     }
 }
