@@ -30,6 +30,10 @@ public class Wrist extends SubsystemBase {
         //setAngle(0);
     }
 
+    public void scoreBasket() {
+        setAngle(-10);
+    }
+
     public void addFifteen() {
         setAngle(0);
     }
