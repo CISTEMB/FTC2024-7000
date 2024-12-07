@@ -6,10 +6,10 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class TrajectorySequenceFollowerCommand extends CommandBase {
-    private final SampleMecanumDrive drive;
-    private final TrajectorySequence trajectory;
+    private SampleMecanumDrive drive;
+    private TrajectorySequence trajectory;
 
-    public TrajectoryFollowerCommand(SampleMecanumDrive drive, TrajectorySequence trajectory) {
+    public TrajectorySequenceFollowerCommand(SampleMecanumDrive drive, TrajectorySequence trajectory) {
         this.drive = drive;
         this.trajectory = trajectory;
     }
@@ -23,7 +23,7 @@ public class TrajectorySequenceFollowerCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         if (interrupted) {
-            trajectory.
+            drive.interruptTrajectorySequence();
         }
     }
 

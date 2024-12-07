@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.commands.TrajectorySequenceFollowerCommand;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Climber;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
@@ -27,7 +28,7 @@ public class Autonomous_RedLeft_BlueRight extends CommandOpMode {
     private SampleMecanumDrive drive;
     private Climber climber;
 
-    public void initalize() {
+    public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addData("intialized", "true");
         elevator = new Elevator(hardwareMap, telemetry);
@@ -52,7 +53,9 @@ public class Autonomous_RedLeft_BlueRight extends CommandOpMode {
                 .build();
 
         schedule(new SequentialCommandGroup(
-                new TrajectorySequenceFollower
+                new TrajectorySequenceFollowerCommand(drive, trajectory0),
+                // drop sample...
+                new TrajectorySequenceFollowerCommand(drive, trajectory1)
         ));
     }
 }
