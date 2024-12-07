@@ -87,6 +87,11 @@ public class Worm extends SubsystemBase {
         lower(-0.25);
     }
 
+    public void scoreBasket() {
+        goToAngle(96);
+
+    }
+
     public void lower(double whatPower) {
         telemetry.addData("WormState", "lower");
         CurrentState = WormState.Lowering;
