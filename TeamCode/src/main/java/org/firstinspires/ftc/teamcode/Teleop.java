@@ -115,6 +115,7 @@ public class Teleop extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.A).toggleWhenActive(new GrabberPickupToggleCommand(grabber));
         driver.getGamepadButton(GamepadKeys.Button.B).toggleWhenActive(new GrabberDropToggleCommand(grabber));
+        driver.getGamepadButton(GamepadKeys.Button.BACK).toggleWhenPressed(new ElevatorRetractCommand(elevator));
     }
 
     @Override
@@ -127,7 +128,7 @@ public class Teleop extends CommandOpMode {
 
         boolean slowDown = driver.getButton(GamepadKeys.Button.Y);
 
-        drive.arcadeDrive(slowDown ? driver.getLeftY() * 0.5 : driver.getLeftY(), slowDown ? driver.getLeftX() * 0.5 : driver.getLeftX(), driver.getButton(GamepadKeys.Button.X), false);
+        drive.arcadeDrive(slowDown ? driver.getLeftY() * 0.5 : driver.getLeftY(), slowDown ? driver.getLeftX() * 0.5 : driver.getLeftX(), !driver.getButton(GamepadKeys.Button.X), false);
 
         //invert the power to match the up and down motion
         worm.setPower(-driver.getRightY());
