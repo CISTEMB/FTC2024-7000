@@ -81,10 +81,12 @@ public class Worm extends SubsystemBase {
     }
 
     public void raise(double whatPower) {
-        telemetry.addData("WormState", "raise");
-        CurrentState = WormState.Raising;
-        motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor.setPower(whatPower);
+        if (this.getAngle() < 75) {
+            telemetry.addData("WormState", "raise");
+            CurrentState = WormState.Raising;
+            motor.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.setPower(whatPower);
+        }
     }
 
     public void lower() {
@@ -158,6 +160,9 @@ public class Worm extends SubsystemBase {
         telemetry.addData("WormState", CurrentState.toString());
         telemetry.addData("WormPotVoltage", pot.getVoltage());
 
+        if (CurrentState == WormState.Raising && this.getAngle() >= 80) {
+            this.brake();
+        }
 //        if (isRaised() && raising) {
 //            telemetry.addData("WormIsRaisedAndTryingTorRaise", "true");
 //            raising = false;
