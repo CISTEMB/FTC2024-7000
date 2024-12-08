@@ -50,7 +50,7 @@ public class Teleop extends CommandOpMode {
         elevator = new Elevator(hardwareMap, telemetry);
         worm = new Worm(hardwareMap, telemetry);
         grabber = new Grabber(hardwareMap, telemetry);
-        wrist = new Wrist(hardwareMap, telemetry, true);
+        wrist = new Wrist(hardwareMap, telemetry, false);
 
         climber = new Climber(hardwareMap, telemetry);
         climber.Goto(0);

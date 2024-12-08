@@ -99,7 +99,7 @@ public class Worm extends SubsystemBase {
     }
 
     public void lower(double whatPower) {
-        if (elevatorDistanceInInches < 19) {
+        if (elevatorDistanceInInches < 17) {
             telemetry.addData("WormState", "lower");
             CurrentState = WormState.Lowering;
             motor.setDirection(DcMotorSimple.Direction.FORWARD);

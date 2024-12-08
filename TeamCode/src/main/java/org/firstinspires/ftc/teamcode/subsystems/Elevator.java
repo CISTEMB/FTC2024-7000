@@ -122,7 +122,7 @@ public class Elevator extends SubsystemBase {
         //wormAngle
          // Changes angle to radians as java uses them by default
         double horizontalExtension = getHorizontalExtension();
-        return horizontalExtension >= 19;
+        return horizontalExtension >= 17;
     }
 
     public double getHorizontalExtension() {

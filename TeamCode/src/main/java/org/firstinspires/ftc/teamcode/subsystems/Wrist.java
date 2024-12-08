@@ -13,8 +13,8 @@ public class Wrist extends SubsystemBase {
     public ServoEx servo;
     private Telemetry tm;
     public boolean Active = false;
-    private int CurrentAngle;
-    private int MinimumAngle = -10;
+    private double CurrentAngle;
+    private int MinimumAngle = -150;
     private int MaximumAngle = 150;
     private int Speed = 1; //default speed is 1
 
@@ -22,8 +22,12 @@ public class Wrist extends SubsystemBase {
     public Wrist(HardwareMap hardwareMap, Telemetry telemetry, boolean isAuto){
         tm = telemetry;
         servo = new SimpleServo(hardwareMap, "wrist", -150, 150);
+        telemetry.addData("wrist servo instantiated", isAuto);
+        telemetry.update();
+        servo.setInverted(true);
         if (!isAuto) {
-            servo.setPosition(1);
+
+            servo.setPosition(0);
             CurrentAngle = 150;
         }
         servo.setInverted(false);
