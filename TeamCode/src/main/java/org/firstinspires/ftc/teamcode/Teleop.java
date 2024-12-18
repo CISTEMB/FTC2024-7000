@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.commands.SetPositionScoreTopBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.WormLowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WormRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.WormResetCommand;
+import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristDownCommand;
 import org.firstinspires.ftc.teamcode.commands.WristStopCommand;
 import org.firstinspires.ftc.teamcode.commands.WristUpCommand;
@@ -142,8 +143,19 @@ public class Teleop extends CommandOpMode {
         //find a command that has an end fluency
         driver.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended()));
         driver.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()));
-        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SetPositionScoreTopBasketCommand(elevatorV2, worm));
-        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SetPositionDefaultCommand(elevatorV2, worm));
+//        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SetPositionScoreTopBasketCommand(elevatorV2, worm));
+//        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SetPositionDefaultCommand(elevatorV2, worm));
+
+        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
+            new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 60),
+            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended())
+        ));
+
+        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
+                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
+                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= 0)
+        ));
+
 
 
 //        driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> {

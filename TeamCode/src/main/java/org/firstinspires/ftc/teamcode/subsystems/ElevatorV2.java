@@ -62,10 +62,18 @@ public class ElevatorV2 extends SubsystemBase {
     }
 
     public void setBrake() {
-        int curr = (int)Math.round(motor.getCurrentPosition());
-        motor.setPower(0.01);
-        motor.setTargetPosition(curr);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        if (this.isRetracted()) {
+            //if we're touching, turn off power
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        } else {
+            //if we're not touching, give it a little power so it doesn't slip
+            int curr = (int)Math.round(motor.getCurrentPosition());
+            motor.setPower(0.01);
+            motor.setTargetPosition(curr);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
     }
 
     //this method returns true if we are maxed out on distance

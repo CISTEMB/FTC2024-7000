@@ -24,6 +24,7 @@ public class SetPositionScoreTopBasketCommand extends CommandBase {
                 new RunCommand(() -> worm.goToAngle(65)),
                 new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended())
         );
+        command.execute();
     }
 
     @Override
