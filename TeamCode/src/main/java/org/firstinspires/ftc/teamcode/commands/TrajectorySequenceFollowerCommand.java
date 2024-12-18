@@ -12,11 +12,12 @@ public class TrajectorySequenceFollowerCommand extends CommandBase {
     public TrajectorySequenceFollowerCommand(SampleMecanumDrive drive, TrajectorySequence trajectory) {
         this.drive = drive;
         this.trajectory = trajectory;
+
     }
 
     @Override
     public void execute() {
-        drive.followTrajectorySequenceAsync(trajectory);
+        drive.followTrajectorySequence(trajectory);
         drive.update();
     }
 

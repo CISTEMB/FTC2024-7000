@@ -94,6 +94,7 @@ public class Worm extends SubsystemBase {
     }
 
     public void scoreBasket() {
+        telemetry.addData("Worm Score Basket Start", "true");
         goToAngle(96);
 
     }
