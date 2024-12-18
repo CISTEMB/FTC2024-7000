@@ -147,7 +147,7 @@ public class Teleop extends CommandOpMode {
 //        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SetPositionDefaultCommand(elevatorV2, worm));
 
         driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
-            new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 60),
+            new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 55),
             new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended())
         ));
 
