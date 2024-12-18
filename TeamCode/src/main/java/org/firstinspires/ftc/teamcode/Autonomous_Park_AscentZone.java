@@ -33,6 +33,11 @@ public class Autonomous_Park_AscentZone extends OpMode {
         worm = new Worm(hardwareMap, telemetry);
         grabber = new Grabber(hardwareMap, telemetry);
         wrist = new Wrist(hardwareMap, telemetry, true);
+        wrist.Goto(0);
+        climber = new Climber(hardwareMap, telemetry);
+        climber.Goto(0);
+
+        drive = new SampleMecanumDrive(hardwareMap);
     }
 
     @Override

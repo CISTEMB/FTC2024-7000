@@ -77,6 +77,7 @@ public class Teleop extends CommandOpMode {
 
         //configV2(); //current competition config
         testingConfigV3();
+
     }
 
     public void configV1() {
