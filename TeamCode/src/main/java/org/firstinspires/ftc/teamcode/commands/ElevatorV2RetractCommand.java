@@ -14,7 +14,7 @@ public class ElevatorV2RetractCommand extends CommandBase {
 
     @Override
     public void execute() {
-        elevatorV2.setPower(-.5);
+        elevatorV2.setPower(-1);
     }
 
     @Override

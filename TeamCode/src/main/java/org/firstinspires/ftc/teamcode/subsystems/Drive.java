@@ -68,17 +68,11 @@ public class Drive extends SubsystemBase {
 
     }
 
-    public void arcadeDrive(double forward, double turn_or_strafe, boolean shouldStrafe, boolean curve) {
+    public void arcadeDrive(double forward, double turn, double strafe, boolean curve) {
         if (curve) {
             forward = inputCurve(forward);
-            turn_or_strafe = inputCurve(turn_or_strafe);
-        }
-        double turn = 0;
-        double strafe = 0;
-        if (shouldStrafe) {
-            strafe = turn_or_strafe;
-        } else {
-            turn = turn_or_strafe;
+            turn = inputCurve(turn);
+            strafe = inputCurve(strafe);
         }
 
         //Calculate speed for each motor

@@ -163,6 +163,10 @@ public class Worm extends SubsystemBase {
         if (CurrentState == WormState.Raising && this.getAngle() >= 80) {
             this.brake();
         }
+
+        if (CurrentState == WormState.Lowering && this.getAngle() <= -10) {
+            this.brake();
+        }
 //        if (isRaised() && raising) {
 //            telemetry.addData("WormIsRaisedAndTryingTorRaise", "true");
 //            raising = false;

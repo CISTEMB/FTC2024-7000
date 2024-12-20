@@ -13,10 +13,12 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorRetractCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2RetractCommand;
+import org.firstinspires.ftc.teamcode.commands.FinalAscentCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropToggleCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberPickupCommand;
@@ -141,22 +143,57 @@ public class Teleop extends CommandOpMode {
 
     public void testingConfigV3() {
         //find a command that has an end fluency
-        driver.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended()));
-        driver.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()));
+//        driver.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended()));
+//        driver.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()));
 //        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SetPositionScoreTopBasketCommand(elevatorV2, worm));
 //        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SetPositionDefaultCommand(elevatorV2, worm));
 
-        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
-            new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 55),
-            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended())
-        ));
-
+        //Y button scoring position in top bucket
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
-                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
-                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= 0)
+            new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 65),
+            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 33.5)
         ));
 
+        //X button pick up position -- close to ground
+        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
+                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 3),
+                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -10)
+        ));
 
+        //right bumper wrist up
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileActiveContinuous(
+                new SequentialCommandGroup(
+                        new WristUpCommand(wrist)
+                ), true
+        ).whenInactive(
+                new WristStopCommand(wrist)
+        );
+
+        //right trigger wrist down
+        new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >  0.5).whileActiveContinuous(
+                new SequentialCommandGroup(
+                        new WristDownCommand(wrist)
+                ), true
+        ).whenInactive(
+                new WristStopCommand(wrist)
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.START).whenPressed(new SequentialCommandGroup(
+                new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 32),
+                new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 14.3),
+                new RunCommand(() -> wrist.setAngle(46), wrist)
+        ));
+
+        //control the elevator with the dpad
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new ElevatorV2ExtendCommand(elevatorV2));
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ElevatorV2RetractCommand(elevatorV2));
+
+        //control the input and output of the grabber
+        driver.getGamepadButton(GamepadKeys.Button.A).toggleWhenActive(new GrabberPickupToggleCommand(grabber));
+        driver.getGamepadButton(GamepadKeys.Button.B).toggleWhenActive(new GrabberDropToggleCommand(grabber));
+
+        //begin final ascent (retract elevator and worm)
+        driver.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new FinalAscentCommand(worm, elevatorV2));
 
 //        driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> {
 //                    int target = elevatorV2.getDistance() - 500;
@@ -166,6 +203,11 @@ public class Teleop extends CommandOpMode {
 
                 //new RunCommand(() -> elevatorV2.setPower(1)).withTimeout() .interruptOn(elevatorV2.getDistance() ));
         //driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> elevatorV2.setTargetDistance(Math.min(elevatorV2.getDistance(), elevatorV2.getTargetDistance()) - 500)));
+
+        drive.setDefaultCommand(
+                new DriveWithGamepadCommand(gamepad1, drive)
+        );
+
     }
 
     @Override
@@ -176,16 +218,9 @@ public class Teleop extends CommandOpMode {
         telemetry.update();
 
         elevatorV2.SetWormAngle(worm.getAngle()); //set this continually so elevator can know how far it can go
-
-
-
         worm.SetElevatorDistanceInInches(elevatorV2.getHorizontalExtension());
 
-        //boolean slowDown = driver.getButton(GamepadKeys.Button.Y);
-
-        //drive.arcadeDrive(slowDown ? driver.getLeftY() * 0.5 : driver.getLeftY(), slowDown ? driver.getLeftX() * 0.5 : driver.getLeftX(), !driver.getButton(GamepadKeys.Button.X), false);
-
-        //invert the power to match the up and down motion
-        //worm.setPower(-driver.getRightY());
+        //invert the power to match the up and down motion -- right vertical joystick
+        worm.setPower(-driver.getRightY());
     }
 }
