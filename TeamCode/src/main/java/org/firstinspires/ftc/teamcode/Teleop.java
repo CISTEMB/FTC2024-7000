@@ -3,11 +3,9 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -18,13 +16,10 @@ import org.firstinspires.ftc.teamcode.commands.ElevatorExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorRetractCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2RetractCommand;
-import org.firstinspires.ftc.teamcode.commands.FinalAscentCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropToggleCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberPickupCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberPickupToggleCommand;
-import org.firstinspires.ftc.teamcode.commands.SetPositionDefaultCommand;
-import org.firstinspires.ftc.teamcode.commands.SetPositionScoreTopBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.WormLowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WormRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.WormResetCommand;
@@ -42,9 +37,6 @@ import org.firstinspires.ftc.teamcode.subsystems.ElevatorV2;
 import org.firstinspires.ftc.teamcode.subsystems.Grabber;
 import org.firstinspires.ftc.teamcode.subsystems.Worm;
 import org.firstinspires.ftc.teamcode.subsystems.Wrist;
-
-import java.util.Set;
-import java.util.function.BooleanSupplier;
 
 @TeleOp(name="TeleOp", group="000Real")
 public class Teleop extends CommandOpMode {
@@ -142,12 +134,6 @@ public class Teleop extends CommandOpMode {
     }
 
     public void testingConfigV3() {
-        //find a command that has an end fluency
-//        driver.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended()));
-//        driver.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()));
-//        driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SetPositionScoreTopBasketCommand(elevatorV2, worm));
-//        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SetPositionDefaultCommand(elevatorV2, worm));
-
         //Y button scoring position in top bucket
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
             new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 65),
@@ -156,7 +142,7 @@ public class Teleop extends CommandOpMode {
 
         //X button pick up position -- close to ground
         driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
-                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 3),
+                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
                 new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -5)
         ));
 
@@ -178,10 +164,10 @@ public class Teleop extends CommandOpMode {
                 new WristStopCommand(wrist)
         );
 
+        //start button set to score top bar for specimen
         driver.getGamepadButton(GamepadKeys.Button.START).whenPressed(new SequentialCommandGroup(
                 new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 32),
-                new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 14.3),
-                new RunCommand(() -> wrist.setAngle(46), wrist)
+                new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 14.3)
         ));
 
         //control the elevator with the dpad
@@ -193,25 +179,20 @@ public class Teleop extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.B).toggleWhenActive(new GrabberDropToggleCommand(grabber));
 
         //begin final ascent (retract elevator and worm)
-        driver.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new FinalAscentCommand(worm, elevatorV2));
+        driver.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new ParallelCommandGroup(
+                new RunCommand(() -> worm.lower(-1), worm),
+                new RunCommand(() -> elevatorV2.setPower(-1), elevatorV2)
+        ));
 
-//        driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> {
-//                    int target = elevatorV2.getDistance() - 500;
-//                    new ElevatorV2ExtendCommand(elevatorV2).withTimeout(100).interruptOn(() -> elevatorV2.getDistance() <= target);
-//                }
-//        );
-
-                //new RunCommand(() -> elevatorV2.setPower(1)).withTimeout() .interruptOn(elevatorV2.getDistance() ));
-        //driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> elevatorV2.setTargetDistance(Math.min(elevatorV2.getDistance(), elevatorV2.getTargetDistance()) - 500)));
-
-        drive.setDefaultCommand(
-                new DriveWithGamepadCommand(gamepad1, drive)
-        );
-
+        //right joystick controls worm height
         new Trigger(() -> 0.1 < Math.abs(driver.getRightY())).whenActive(
                 new RunCommand(() -> worm.setPower(-driver.getRightY()), worm)
         );
 
+        //set the driving command
+        drive.setDefaultCommand(
+                new DriveWithGamepadCommand(gamepad1, drive)
+        );
     }
 
     @Override
