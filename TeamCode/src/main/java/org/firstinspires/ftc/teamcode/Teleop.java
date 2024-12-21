@@ -151,13 +151,13 @@ public class Teleop extends CommandOpMode {
         //Y button scoring position in top bucket
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
             new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 65),
-            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 33.5)
+            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 34)
         ));
 
         //X button pick up position -- close to ground
         driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
                 new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 3),
-                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -10)
+                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -5)
         ));
 
         //right bumper wrist up
@@ -208,6 +208,10 @@ public class Teleop extends CommandOpMode {
                 new DriveWithGamepadCommand(gamepad1, drive)
         );
 
+        new Trigger(() -> 0.1 < Math.abs(driver.getRightY())).whenActive(
+                new RunCommand(() -> worm.setPower(-driver.getRightY()), worm)
+        );
+
     }
 
     @Override
@@ -219,8 +223,5 @@ public class Teleop extends CommandOpMode {
 
         elevatorV2.SetWormAngle(worm.getAngle()); //set this continually so elevator can know how far it can go
         worm.SetElevatorDistanceInInches(elevatorV2.getHorizontalExtension());
-
-        //invert the power to match the up and down motion -- right vertical joystick
-        worm.setPower(-driver.getRightY());
     }
 }
