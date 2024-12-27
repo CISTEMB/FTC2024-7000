@@ -16,7 +16,7 @@ public class Wrist extends SubsystemBase {
     private double CurrentAngle;
     private int MinimumAngle = -150;
     private int MaximumAngle = 150;
-    private int Speed = 1; //default speed is 1
+    private double Speed = .25; //default speed is 1
 
 
     public Wrist(HardwareMap hardwareMap, Telemetry telemetry, boolean isAuto){
@@ -45,7 +45,7 @@ public class Wrist extends SubsystemBase {
         setAngle(40);
     }
 
-    public void SetSpeed(int speed) {
+    public void SetSpeed(double speed) {
         Speed = speed;
     }
     public void Goto(int angle) {
