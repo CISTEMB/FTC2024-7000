@@ -22,7 +22,7 @@ public class SetPositionScoreTopBasketCommand extends CommandBase {
     public void execute() {
         SequentialCommandGroup command = new SequentialCommandGroup(
                 new RunCommand(() -> worm.goToAngle(65)),
-                new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.isExtended())
+                new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.isExtended())
         );
         command.execute();
     }

@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commands.WormRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.WormResetCommand;
 import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristDownCommand;
+import org.firstinspires.ftc.teamcode.commands.WristSetAngleCommand;
 import org.firstinspires.ftc.teamcode.commands.WristStopCommand;
 import org.firstinspires.ftc.teamcode.commands.WristUpCommand;
 import org.firstinspires.ftc.teamcode.commands.ClimberDownCommand;
@@ -137,7 +138,7 @@ public class Teleop extends CommandOpMode {
         //Y button scoring position in top bucket
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
             new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 65),
-            new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 34)
+            new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() >= 34)
         ));
 
         //X button pick up position -- close to ground
@@ -166,12 +167,15 @@ public class Teleop extends CommandOpMode {
 
         //start button set to score top bar for specimen
         driver.getGamepadButton(GamepadKeys.Button.START).whenPressed(new SequentialCommandGroup(
-                new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 32),
-                new ElevatorV2ExtendCommand(elevatorV2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 14.3)
+                new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 23.00),
+                new WormSetPowerCommand(worm, 0.2).interruptOn(() -> worm.getAngle() > 27.5), //final target: 28.5
+                new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() >= 11.0),
+                new ElevatorV2ExtendCommand(elevatorV2, 0.5).interruptOn(() -> elevatorV2.getDistanceInInches() >= 12.8),
+                new WristSetAngleCommand(wrist, 132.0) //132.0
         ));
 
         //control the elevator with the dpad
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new ElevatorV2ExtendCommand(elevatorV2));
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new ElevatorV2ExtendCommand(elevatorV2, 1));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ElevatorV2RetractCommand(elevatorV2));
 
         //control the input and output of the grabber

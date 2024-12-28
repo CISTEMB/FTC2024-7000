@@ -63,7 +63,7 @@ public class ElevatorV2 extends SubsystemBase {
 
     public void setBrake() {
 
-        if (this.isRetracted() || this.wormAngle < 30) {
+        if (this.isRetracted() || this.wormAngle < 20) {
             //if we're touching, or the worm is low, turn off power
             motor.setPower(0);
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
