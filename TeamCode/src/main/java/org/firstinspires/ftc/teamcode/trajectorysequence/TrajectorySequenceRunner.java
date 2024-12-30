@@ -307,4 +307,9 @@ public class TrajectorySequenceRunner {
     public void interruptTrajectorySequence() {
         currentTrajectorySequence = null;
     }
+
+    public void breakFollowing() {
+        currentTrajectorySequence = null;
+        remainingMarkers.clear();
+    }
 }
