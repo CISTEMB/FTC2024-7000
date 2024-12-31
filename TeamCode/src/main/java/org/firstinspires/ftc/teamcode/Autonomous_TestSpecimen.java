@@ -10,12 +10,15 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
 import org.firstinspires.ftc.teamcode.commands.TrajectorySequenceFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristSetAngleCommand;
@@ -74,11 +77,19 @@ public class Autonomous_TestSpecimen extends CommandOpMode {
                 .lineToConstantHeading(new Vector2d(5.06, -37.69), new AngularVelocityConstraint(6), new ProfileAccelerationConstraint(6))
                 .build();
 
+        Trajectory backup = mecanumDriveSubsystem.trajectoryBuilder(pushForward.end())
+                .lineToConstantHeading(new Vector2d(5.06, -47.69))
+                .build();
+
         schedule(
                 new SequentialCommandGroup(
                         new TrajectoryFollowerCommand(mecanumDriveSubsystem, rightTapeToScoringPosition),
                         scoreSpecimenGroup,
-                        new TrajectoryFollowerCommand(mecanumDriveSubsystem, pushForward)
+                        new TrajectoryFollowerCommand(mecanumDriveSubsystem, pushForward),
+                        new ParallelDeadlineGroup(
+                                new TrajectoryFollowerCommand(mecanumDriveSubsystem, backup),
+                                new GrabberDropCommand(grabber)
+                        )
                 )
         );
 
