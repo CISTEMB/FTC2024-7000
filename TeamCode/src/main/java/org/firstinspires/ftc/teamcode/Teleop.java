@@ -143,7 +143,7 @@ public class Teleop extends CommandOpMode {
 
         //X button pick up position -- close to ground
         driver.getGamepadButton(GamepadKeys.Button.X).whenPressed(new SequentialCommandGroup(
-                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
+                new ElevatorV2RetractCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.isRetracted()),
                 new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -5)
         ));
 
@@ -176,7 +176,7 @@ public class Teleop extends CommandOpMode {
 
         //control the elevator with the dpad
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new ElevatorV2ExtendCommand(elevatorV2, 1));
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ElevatorV2RetractCommand(elevatorV2));
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ElevatorV2RetractCommand(elevatorV2, 1));
 
         //control the input and output of the grabber
         driver.getGamepadButton(GamepadKeys.Button.A).toggleWhenActive(new GrabberPickupToggleCommand(grabber));

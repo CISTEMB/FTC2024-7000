@@ -20,7 +20,7 @@ public class SetPositionDefaultCommand extends CommandBase {
     @Override
     public void execute() {
         SequentialCommandGroup command = new SequentialCommandGroup(
-                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
+                new ElevatorV2RetractCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.isRetracted()),
                 new RunCommand(() -> worm.goToAngle(0))
         );
     }
