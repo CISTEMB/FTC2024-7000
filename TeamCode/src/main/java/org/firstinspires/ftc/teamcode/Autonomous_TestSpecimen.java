@@ -18,7 +18,9 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.ElevatorV2RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
+import org.firstinspires.ftc.teamcode.commands.GrabberPickupCommand;
 import org.firstinspires.ftc.teamcode.commands.TrajectorySequenceFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristSetAngleCommand;
@@ -68,9 +70,16 @@ public class Autonomous_TestSpecimen extends CommandOpMode {
         SequentialCommandGroup scoreSpecimenGroup = new SequentialCommandGroup(
                 new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 23.00),
                 new WormSetPowerCommand(worm, 0.2).interruptOn(() -> worm.getAngle() > 27.0), //final target: 28.5
-                new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() >= 11.0),
-                new ElevatorV2ExtendCommand(elevatorV2, 0.5).interruptOn(() -> elevatorV2.getDistanceInInches() >= 12.8),
-                new WristSetAngleCommand(wrist, 132.0) //132.0
+                new ParallelCommandGroup(
+                    new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() >= 11.0),
+                    new WristSetAngleCommand(wrist, 132.0) //132.0
+                ),
+                new ElevatorV2ExtendCommand(elevatorV2, 0.5).interruptOn(() -> elevatorV2.getDistanceInInches() >= 12.8)
+        );
+
+        SequentialCommandGroup resetElevatorGroup = new SequentialCommandGroup(
+                new ElevatorV2RetractCommand(elevatorV2).interruptOn(() -> elevatorV2.isRetracted()),
+                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -5)
         );
 
         Trajectory pushForward = mecanumDriveSubsystem.trajectoryBuilder(rightTapeToScoringPosition.end())
@@ -81,6 +90,11 @@ public class Autonomous_TestSpecimen extends CommandOpMode {
                 .lineToConstantHeading(new Vector2d(5.06, -47.69))
                 .build();
 
+        Trajectory parkOnRight = mecanumDriveSubsystem.trajectoryBuilder(backup.end())
+                .splineTo(new Vector2d(39.66, -25.03), Math.toRadians(90.00))
+                .splineTo(new Vector2d(25.31, -11.67), Math.toRadians(180.00))
+                .build();
+
         schedule(
                 new SequentialCommandGroup(
                         new TrajectoryFollowerCommand(mecanumDriveSubsystem, rightTapeToScoringPosition),
@@ -88,8 +102,10 @@ public class Autonomous_TestSpecimen extends CommandOpMode {
                         new TrajectoryFollowerCommand(mecanumDriveSubsystem, pushForward),
                         new ParallelDeadlineGroup(
                                 new TrajectoryFollowerCommand(mecanumDriveSubsystem, backup),
-                                new GrabberDropCommand(grabber)
-                        )
+                                new GrabberPickupCommand(grabber)
+                        ),
+                        resetElevatorGroup,
+                        new TrajectoryFollowerCommand(mecanumDriveSubsystem, parkOnRight)
                 )
         );
 
