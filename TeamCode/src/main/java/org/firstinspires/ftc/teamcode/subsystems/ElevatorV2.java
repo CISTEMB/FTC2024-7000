@@ -100,7 +100,11 @@ public class ElevatorV2 extends SubsystemBase {
         telemetry.addData("ElevatorIsExtended", isExtended());
         telemetry.addData("Elevator Power", motor.getPower());
 
-
+        //we were having an issue where the elevator wouldn't reset unless we were pressing the back button, which was causing issues where the elevator would extend too far
+        if (bottomLimit.isPressed() == true && motor.getPower() <= 0) {
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
 
 //            //this will make the elevator retract
 //            if (isHomed == false) {

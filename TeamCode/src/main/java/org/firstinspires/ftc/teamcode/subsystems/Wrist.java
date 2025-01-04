@@ -79,6 +79,9 @@ public class Wrist extends SubsystemBase {
         setAngle(-25);
     }
 
+    public double getAngle() {
+        return servo.getAngle();
+    }
     @Override
     public void periodic(){
         tm.addData("wrist active", this.Active);

@@ -11,13 +11,16 @@ import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationCon
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberPickupCommand;
+import org.firstinspires.ftc.teamcode.commands.WormRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristSetAngleCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
@@ -52,6 +55,11 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
         climber = new Climber(hardwareMap, telemetry);
         climber.Goto(0);
 
+        telemetry.addData("worm angle", worm.getAngle());
+        telemetry.addData("elevator distance inches", elevatorV2.getDistanceInInches());
+        telemetry.addData("wrist angle", wrist.getAngle());
+        telemetry.update();
+
         drive = new SampleMecanumDrive(hardwareMap);
         mecanumDriveSubsystem = new MecanumDriveSubsystem(drive, false);
 
@@ -75,7 +83,7 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
         SequentialCommandGroup resetElevatorGroup = new SequentialCommandGroup(
                 new ElevatorV2RetractCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
                 new ElevatorV2RetractCommand(elevatorV2, 0.2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
-                new WormSetPowerCommand(worm, -1).interruptOn(() -> worm.getAngle() <= -5)
+                new WormSetPowerCommand(worm, -0.5).interruptOn(() -> worm.getAngle() <= -5.5)
         );
 
         Trajectory pushForward = mecanumDriveSubsystem.trajectoryBuilder(leftTapeToScoringPosition.end())
@@ -83,15 +91,15 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
                 .build();
 
         Trajectory backup = mecanumDriveSubsystem.trajectoryBuilder(pushForward.end())
-                .lineToConstantHeading(new Vector2d(-12.64, -47.69))
+                .lineToConstantHeading(new Vector2d(-13.64, -47.69))
                 .build();
 
         Trajectory driveToFirstSample = mecanumDriveSubsystem.trajectoryBuilder(backup.end())
-                .lineToConstantHeading(new Vector2d(-52.87, -47.69))
+                .lineToConstantHeading(new Vector2d(-54.27, -47.69), new AngularVelocityConstraint(6), new ProfileAccelerationConstraint(6))
                 .build();
 
         Trajectory pickupToFirstSample = mecanumDriveSubsystem.trajectoryBuilder(driveToFirstSample.end())
-                .lineToConstantHeading(new Vector2d(-52.87, -35.00), new AngularVelocityConstraint(6), new ProfileAccelerationConstraint(6))
+                .lineToConstantHeading(new Vector2d(-54.27, -40.00), new AngularVelocityConstraint(2), new ProfileAccelerationConstraint(2))
                 .build();
 
         schedule(
@@ -100,18 +108,24 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
                 scoreSpecimenGroup,
                 new TrajectoryFollowerCommand(mecanumDriveSubsystem, pushForward),
                 new ParallelDeadlineGroup(
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, backup),
-                    new GrabberPickupCommand(grabber)
+                        new WaitCommand(500),
+                        new GrabberDropCommand(grabber)
+                ),
+                new ParallelDeadlineGroup(
+                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, backup)
                 ),
                 resetElevatorGroup,
                 new TrajectoryFollowerCommand(mecanumDriveSubsystem, driveToFirstSample),
                 new ParallelCommandGroup(
                     new WristSetAngleCommand(wrist, 150),
-                    new ElevatorV2ExtendCommand(elevatorV2, 0.2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 4)
+                    new ElevatorV2ExtendCommand(elevatorV2, 0.2).interruptOn(() -> elevatorV2.getDistanceInInches() >= 6)
                 ),
-                new ParallelDeadlineGroup(
+                new ParallelCommandGroup(
                     new TrajectoryFollowerCommand(mecanumDriveSubsystem, pickupToFirstSample),
-                    new GrabberDropCommand(grabber)
+                    new ParallelRaceGroup(
+                        new GrabberPickupCommand(grabber),
+                        new WaitCommand(3250)
+                    )
                 )
             )
         );
@@ -122,6 +136,9 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
         super.run();
         elevatorV2.SetWormAngle(worm.getAngle()); //set this continually so elevator can know how far it can go
         worm.SetElevatorDistanceInInches(elevatorV2.getHorizontalExtension());
+        telemetry.addData("worm angle", worm.getAngle());
+        telemetry.addData("elevator distance inches", elevatorV2.getDistanceInInches());
+        telemetry.addData("wrist angle", wrist.getAngle());
         telemetry.update();
     }
 }
