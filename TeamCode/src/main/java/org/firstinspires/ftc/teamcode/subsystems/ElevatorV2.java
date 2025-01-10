@@ -23,7 +23,7 @@ public class ElevatorV2 extends SubsystemBase {
     private double currentPower = 0.5;
 
 
-    public ElevatorV2(HardwareMap hm, Telemetry tm){
+    public ElevatorV2(HardwareMap hm, Telemetry tm) {
         wormAngle = 0; //the value of the worm angle so we can calculate max distance
         motor = hm.get(DcMotorEx.class, "Extend");
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -49,7 +49,7 @@ public class ElevatorV2 extends SubsystemBase {
         }
     }
 
-    public int getDistance(){
+    public int getDistance() {
         return motor.getCurrentPosition();
     }
 
@@ -59,6 +59,10 @@ public class ElevatorV2 extends SubsystemBase {
 
     public boolean isRetracted() {
         return bottomLimit.isPressed();
+    }
+
+    public boolean isVerticallyExtended() {
+            return motor.getCurrentPosition() >= 2900;
     }
 
     public void setBrake() {

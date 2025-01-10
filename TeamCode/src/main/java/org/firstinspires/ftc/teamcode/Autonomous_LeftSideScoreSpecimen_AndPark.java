@@ -20,7 +20,6 @@ import org.firstinspires.ftc.teamcode.commands.ElevatorV2ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.ElevatorV2RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberDropCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabberPickupCommand;
-import org.firstinspires.ftc.teamcode.commands.WormRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.WormSetPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.WristSetAngleCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
@@ -33,8 +32,8 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.Worm;
 import org.firstinspires.ftc.teamcode.subsystems.Wrist;
 
-@Autonomous(name="Autonomous: LeftSideScoreSpecimen", group="000Real")
-public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
+@Autonomous(name="Autonomous: LeftSideScoreSpecimen_AndPark", group="000Real")
+public class Autonomous_LeftSideScoreSpecimen_AndPark extends CommandOpMode {
 
     private ElevatorV2 elevatorV2;
     private Worm worm;
@@ -58,7 +57,6 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
 
         telemetry.addData("worm angle", worm.getAngle());
         telemetry.addData("elevator distance inches", elevatorV2.getDistanceInInches());
-        telemetry.addData("elevator motor distance", elevatorV2.getDistance());
         telemetry.addData("wrist angle", wrist.getAngle());
         telemetry.update();
 
@@ -79,73 +77,32 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
                     new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() >= 11.0),
                     new WristSetAngleCommand(wrist, 132.0) //132.0
                 ),
-                new ElevatorV2ExtendCommand(elevatorV2, 0.5).interruptOn(() -> elevatorV2.getDistanceInInches() >= 12.5)
+                new ElevatorV2ExtendCommand(elevatorV2, 0.5).interruptOn(() -> elevatorV2.getDistanceInInches() >= 12.8)
         );
 
         SequentialCommandGroup resetElevatorGroup = new SequentialCommandGroup(
-                new ElevatorV2RetractCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
-                new ElevatorV2RetractCommand(elevatorV2, 0.2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
-                new WormSetPowerCommand(worm, -0.5).interruptOn(() -> worm.getAngle() <= -3.5)
-        );
-
-        SequentialCommandGroup resetElevatorGroupTwo = new SequentialCommandGroup(
                 new ElevatorV2RetractCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
                 new ElevatorV2RetractCommand(elevatorV2, 0.2).interruptOn(() -> elevatorV2.getDistanceInInches() <= 2),
                 new WormSetPowerCommand(worm, -0.5).interruptOn(() -> worm.getAngle() <= -4.5)
         );
 
         Trajectory pushForward = mecanumDriveSubsystem.trajectoryBuilder(leftTapeToScoringPosition.end())
-                .lineToConstantHeading(new Vector2d(-12.64, -37.69), new AngularVelocityConstraint(12), new ProfileAccelerationConstraint(12))
+                .lineToConstantHeading(new Vector2d(-12.64, -37.69), new AngularVelocityConstraint(6), new ProfileAccelerationConstraint(6))
                 .build();
 
         Trajectory backup = mecanumDriveSubsystem.trajectoryBuilder(pushForward.end())
                 .lineToConstantHeading(new Vector2d(-13.64, -47.69))
                 .build();
 
-        Trajectory driveToFirstSample = mecanumDriveSubsystem.trajectoryBuilder(backup.end())
-                .lineToConstantHeading(new Vector2d(-52.00, -47.69), new AngularVelocityConstraint(24), new ProfileAccelerationConstraint(24))
+        Trajectory driveToParkingZone = mecanumDriveSubsystem.trajectoryBuilder(new Pose2d(-13.62, -47.98, Math.toRadians(90.00)))
+                .splineTo(new Vector2d(-35.55, -29.54), Math.toRadians(90.00))
+                .splineTo(new Vector2d(-27.31, -11.94), Math.toRadians(15.64))
                 .build();
-
-        Trajectory pickupToFirstSample = mecanumDriveSubsystem.trajectoryBuilder(driveToFirstSample.end())
-                .lineToConstantHeading(new Vector2d(-52.50, -38.00), new AngularVelocityConstraint(4), new ProfileAccelerationConstraint(4))
-                .build();
-
-        Trajectory dontBonkSecondSamples = mecanumDriveSubsystem.trajectoryBuilder(pickupToFirstSample.end())
-                .lineToConstantHeading(new Vector2d(-52.50, -42.00), new AngularVelocityConstraint(24), new ProfileAccelerationConstraint(24))
-                .build();
-
-
-//        Trajectory turnToFaceBasket = mecanumDriveSubsystem.trajectoryBuilder(dontBonkSecondSamples.end())
-//                .splineTo(new Vector2d(-54.68, -55.38), Math.toRadians(225.00), new AngularVelocityConstraint(4), new ProfileAccelerationConstraint(4))
-//                .build();
-
-        Trajectory moveToDunk = mecanumDriveSubsystem.trajectoryBuilder(new Pose2d(-52.50, -42.00, Math.toRadians(225.00)))
-                .lineToConstantHeading(new Vector2d(-60.08, -60.22), new AngularVelocityConstraint(14), new ProfileAccelerationConstraint(14))
-                .build();
-
-        Trajectory victoryScoot = mecanumDriveSubsystem.trajectoryBuilder(moveToDunk.end())
-                .lineToConstantHeading(new Vector2d(-54.68, -55.38))
-                .build();
-
-        Trajectory leftPark = mecanumDriveSubsystem.trajectoryBuilder(new Pose2d(-54.96, -55.80, Math.toRadians(90.00)))
-                .splineTo(new Vector2d(-42.11, -25.49), Math.toRadians(90.00))
-                .splineTo(new Vector2d(-24.79, -12.22), Math.toRadians(0.00))
-                .build();
-
-
-
-//        TrajectorySequence trajectory2 = drive.trajectorySequenceBuilder(new Pose2d(-60.13, -61.66, Math.toRadians(90.00)))
-//                .splineTo(new Vector2d(-42.53, -32.05), Math.toRadians(29.49))
-//                .splineTo(new Vector2d(-24.51, -10.68), Math.toRadians(-2.23))
-//                .build();
-
 
         schedule(
             new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, leftTapeToScoringPosition),
-                    scoreSpecimenGroup
-                ),
+                new TrajectoryFollowerCommand(mecanumDriveSubsystem, leftTapeToScoringPosition),
+                scoreSpecimenGroup,
                 new TrajectoryFollowerCommand(mecanumDriveSubsystem, pushForward),
                 new ParallelDeadlineGroup(
                         new WaitCommand(500),
@@ -154,43 +111,8 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
                 new ParallelDeadlineGroup(
                     new TrajectoryFollowerCommand(mecanumDriveSubsystem, backup)
                 ),
-                new ParallelCommandGroup(
-                    resetElevatorGroup,
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, driveToFirstSample)
-                ),
-                new ParallelCommandGroup(
-                    new WristSetAngleCommand(wrist, 150),
-                    new ElevatorV2ExtendCommand(elevatorV2, 0.8).interruptOn(() -> elevatorV2.getDistanceInInches() >= 6)
-                ),
-                new ParallelCommandGroup(
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, pickupToFirstSample),
-                    new ParallelRaceGroup(
-                        new GrabberPickupCommand(grabber),
-                        new WaitCommand(2400)
-                    )
-                ),
-                new ParallelCommandGroup(
-                    new ElevatorV2RetractCommand(elevatorV2, 1.0).interruptOn(() -> elevatorV2.isRetracted()),
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, dontBonkSecondSamples)
-                ),
-                new ParallelCommandGroup(
-                    new TurnCommand(mecanumDriveSubsystem, Math.toRadians(135)),
-                    new SequentialCommandGroup(
-                        new WormSetPowerCommand(worm, 1).interruptOn(() -> worm.getAngle() > 65),
-                        new ElevatorV2ExtendCommand(elevatorV2, 1).interruptOn(() -> elevatorV2.isVerticallyExtended())
-                    )
-                ),
-                new TrajectoryFollowerCommand(mecanumDriveSubsystem, moveToDunk),
-                new ParallelRaceGroup(
-                    new GrabberPickupCommand(grabber),
-                    new WaitCommand(1750)
-                ),
-                new TrajectoryFollowerCommand(mecanumDriveSubsystem, victoryScoot),
-                new TurnCommand(mecanumDriveSubsystem, Math.toRadians(-135)),
-                new ParallelCommandGroup(
-                    new TrajectoryFollowerCommand(mecanumDriveSubsystem, leftPark),
-                    resetElevatorGroupTwo
-                )
+                resetElevatorGroup,
+                new TrajectoryFollowerCommand(mecanumDriveSubsystem, driveToParkingZone)
             )
         );
     }
@@ -202,7 +124,6 @@ public class Autonomous_LeftSideScoreSpecimen extends CommandOpMode {
         worm.SetElevatorDistanceInInches(elevatorV2.getHorizontalExtension());
         telemetry.addData("worm angle", worm.getAngle());
         telemetry.addData("elevator distance inches", elevatorV2.getDistanceInInches());
-        telemetry.addData("elevator motor distance", elevatorV2.getDistance());
         telemetry.addData("wrist angle", wrist.getAngle());
         telemetry.update();
     }
